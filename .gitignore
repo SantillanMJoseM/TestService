@@ -46,3 +46,8 @@ coverage/
 
 # Docker
 docker-compose.override.yml
+
+# Archivos generados por Next.js / TypeScript
+next-env.d.ts
+tsconfig.tsbuildinfo
+*.tsbuildinfo
