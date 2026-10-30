@@ -10,7 +10,8 @@ const customJestConfig = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
-  testMatch: ["**/tests/**/*.test.ts", "**/tests/**/*.test.tsx"],
+  testMatch: ["**/tests/unit/**/*.test.ts", "**/tests/unit/**/*.test.tsx"],
+  testPathIgnorePatterns: ["/node_modules/", "/tests/integration/"],
 };
 
 module.exports = createJestConfig(customJestConfig);
