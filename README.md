@@ -1,234 +1,259 @@
 # TestService
 
-Aplicación web de gestión de testing funcional y UAT (User Acceptance Testing), con interfaz en español. Permite administrar proyectos, módulos, versiones, casos de prueba, ejecuciones, incidencias y aprobaciones de usuarios de negocio.
+Aplicacion web de gestion de testing funcional y UAT (User Acceptance Testing), con interfaz en espanol. Permite administrar proyectos, modulos, versiones, casos de prueba, ejecuciones, incidencias y aprobaciones de usuarios de negocio.
 
-## Descripción y objetivo
+## Descripcion y objetivo
 
+TestService es una plataforma disenada para equipos de calidad y usuarios de negocio que necesitan planificar, ejecutar y hacer seguimiento de pruebas funcionales y de aceptacion (UAT). El sistema centraliza la informacion de casos de prueba, ciclos de prueba, ejecuciones, incidencias y aprobaciones, facilitando la trazabilidad y la toma de decisiones antes de cada release.
 
-## Funcionalidades previstas
+## Funcionalidades
 
-- Gestión de proyectos (alta, edición, consulta)
-- Gestión de módulos por proyecto
-- Gestión de versiones de software
-- Catálogo de casos de prueba con pasos y resultado esperado
+- Gestion de proyectos (alta, edicion, consulta, eliminacion)
+- Gestion de modulos por proyecto
+- Gestion de versiones de software
+- Catalogo de casos de prueba con pasos y resultado esperado
 - Ciclos de prueba (test cycles) asociados a versiones
-- Ejecuciones de casos de prueba con estado (Pendiente, Aprobado, Rechazado, Bloqueado)
+- Ejecuciones de casos de prueba con estado (Pendiente, Aprobado, Rechazado, Bloqueado, No ejecutado)
 - Registro de incidencias (defectos) vinculadas a ejecuciones
 - Aprobaciones UAT por usuarios de negocio
-- Autenticación de usuarios con roles (Admin, Tester, BusinessUser, Viewer)
-- Interfaz en español
+- Autenticacion de usuarios con roles (Admin, Tester, BusinessUser, Viewer)
+- Dashboard con metricas y resumen del estado de testing
+- Exportacion de datos a CSV, Excel y PDF
+- Auditoria de cambios y acciones
+- Notificaciones de incidencias criticas
+- Interfaz en espanol
 
-## Tecnologías elegidas
+## Tecnologias elegidas
 
-| Tecnología | Función |
+| Tecnologia | Funcion |
 |------------|---------|
 | Next.js 15 | Framework de React para renderizado del frontend y rutas API |
-| TypeScript | Tipado estático para JavaScript |
+| TypeScript | Tipado estatico para JavaScript |
+| PostgreSQL 17 | Base de datos relacional |
+| Prisma ORM | Mapeo objeto-relacional y migraciones de base de datos |
+| Tailwind CSS | Estilos utilitarios para la interfaz de usuario |
+| Zod | Validacion de esquemas |
+| Jest | Framework de pruebas unitarias y de integracion |
+| bcryptjs | Hash de contrasenas |
+| jsPDF | Generacion de reportes PDF |
+| xlsx (SheetJS) | Generacion de reportes Excel |
 
 ## Requisitos para desarrollar localmente en Windows
 
-- [Git](https://git-scm.com/) (2.24 o superior)
-- [Node.js](https://nodejs.org/) (18 o superior, se recomienda LTS)
-- [PostgreSQL](https://www.postgresql.org/download/windows/) (14 o superior)
-- [npm](https://www.npmjs.com/) (incluido con Node.js)
-- Editor de código: [Visual Studio Code](https://code.visualstudio.com/)
+- Git (2.24 o superior)
+- Node.js (18 o superior, se recomienda LTS)
+- PostgreSQL (14 o superior, recomendado 17)
+- npm (incluido con Node.js)
+- Editor de codigo: Visual Studio Code
 
-## Instalación y ejecución del proyecto
+## Instalacion y ejecucion del proyecto
 
-1. Clonar el repositorio:
-   ```bash
-   git clone https://github.com/SantillanMJoseM/TestService.git
-   cd TestService
-   ```
+### 1. Clonar el repositorio
 
-2. Instalar dependencias:
-   ```bash
-   npm install
-   ```
+    git clone https://github.com/SantillanMJoseM/TestService.git
+    cd TestService
 
-3. Copiar el archivo de variables de entorno:
-   ```bash
+### 2. Instalar dependencias
 
-## Configuración de variables de entorno
+    npm install
 
-Copiar `.env.example` a `.env` y completar los valores:
+### 3. Configurar variables de entorno
 
-| Variable | Descripción | Ejemplo |
+    copy .env.example .env
+
+Editar .env con los valores correctos de tu entorno local (especialmente DATABASE_URL).
+
+### 4. Configurar PostgreSQL
+
+1. Instalar PostgreSQL en Windows y crear una base de datos llamada testing_uat.
+2. Configurar el usuario y contrasena en DATABASE_URL dentro de .env:
+   DATABASE_URL="postgresql://postgres:tu_password@localhost:5432/testing_uat?schema=public"
+
+## Configuracion de variables de entorno
+
+Copiar .env.example a .env y completar los valores:
+
+| Variable | Descripcion | Ejemplo |
 |----------|-------------|---------|
-| `DATABASE_URL` | Cadena de conexión a PostgreSQL | `postgresql://usuario:password@localhost:5432/testservice` |
-| `NEXTAUTH_SECRET` | Secreto para firmar sesiones | Cambiar en producción por un valor seguro |
-| `NEXTAUTH_URL` | URL base de la aplicación | `http://localhost:3000` |
-| `NEXT_PUBLIC_APP_URL` | URL pública de la app | `http://localhost:3000` |
-| `PORT` | Puerto del servidor | `3000` |
+| DATABASE_URL | Cadena de conexion a PostgreSQL | postgresql://postgres:password@localhost:5432/testing_uat |
+| NEXTAUTH_SECRET | Secreto para firmar sesiones | Cambiar en produccion por un valor seguro |
+| NEXTAUTH_URL | URL base de la aplicacion | http://localhost:3000 |
+| NEXT_PUBLIC_APP_URL | URL publica de la app | http://localhost:3000 |
+| PORT | Puerto del servidor | 3000 |
 
-> **Importante:** Nunca subas el archivo `.env` al repositorio. Está incluido en `.gitignore`.
-   copy .env.example .env
+> Importante: Nunca subas el archivo .env al repositorio. Esta incluido en .gitignore.
 
-## Configuración de PostgreSQL y Prisma
+## Configuracion de PostgreSQL y Prisma
 
-1. Instalar PostgreSQL en Windows y crear una base de datos llamada `testservice`.
-2. Configurar el usuario y contraseña en `DATABASE_URL` dentro de `.env`.
-3. Ejecutar `npx prisma generate` para generar el cliente Prisma.
-4. Ejecutar `npx prisma migrate dev` para aplicar las migraciones iniciales.
-5. (Opcional) Ejecutar `npx prisma studio` para visualizar y editar datos con una interfaz gráfica.
+1. Instalar PostgreSQL en Windows y crear una base de datos llamada testing_uat.
+2. Configurar el usuario y contrasena en DATABASE_URL dentro de .env.
+3. Ejecutar npx prisma generate para generar el cliente Prisma.
+4. Ejecutar npx prisma migrate dev para aplicar las migraciones iniciales.
+5. (Opcional) Ejecutar npx prisma studio para visualizar y editar datos con una interfaz grafica.
 
-## Ejecución de migraciones
+## Ejecucion de migraciones
 
-```bash
-# Crear una nueva migración
-npx prisma migrate dev --name nombre_de_la_migracion
+    # Crear una nueva migracion
+    npx prisma migrate dev --name nombre_de_la_migracion
 
-# Aplicar migraciones pendientes en producción
-npx prisma migrate deploy
+    # Aplicar migraciones pendientes en produccion
+    npx prisma migrate deploy
 
-# Abrir Prisma Studio (GUI de la base de datos)
-npx prisma studio
-```
+    # Abrir Prisma Studio (GUI de la base de datos)
+    npx prisma studio
 
-## Comandos de desarrollo, compilación y pruebas
+## Comandos de desarrollo, compilacion y pruebas
 
-| Comando | Descripción |
+| Comando | Descripcion |
 |---------|-------------|
+| npm run dev | Inicia el servidor de desarrollo con recarga en caliente |
+| npm run build | Compila la aplicacion para produccion |
+| npm run start | Inicia el servidor en modo produccion |
+| npm run lint | Ejecuta ESLint para revisar el codigo |
+| npm run test | Ejecuta pruebas unitarias |
+| npm run test:unit | Ejecuta pruebas unitarias |
+| npm run test:integration | Ejecuta pruebas de integracion (requiere servidor corriendo) |
+| npx prisma generate | Genera el cliente de Prisma desde el schema |
+| npx prisma migrate dev | Ejecuta migraciones en entorno de desarrollo |
+| npx prisma studio | Abre la interfaz grafica de Prisma |
 
 ## Estructura de carpetas
 
-```
-TestService/
-├── README.md
-├── .gitignore
-├── .env.example
-├── package.json
-├── tsconfig.json
-├── next.config.ts
-├── prisma/
-│   └── schema.prisma
-├── docker/
-│   └── postgres/
-├── docs/
-│   ├── architecture.md
-│   ├── data-model.md
-│   ├── development-setup.md
-│   └── deployment.md
-├── scripts/
-├── public/
-├── src/
-│   ├── app/
-│   ├── components/
-│   ├── features/
-│   │   ├── projects/
-│   │   ├── modules/
-│   │   ├── versions/
-│   │   ├── test-cases/
-│   │   ├── test-cycles/
-│   │   ├── executions/
-│   │   ├── defects/
-│   │   └── uat/
-│   ├── lib/
-│   ├── services/
-│   ├── types/
-│   └── styles/
-└── tests/
-    ├── unit/
-    └── integration/
-```
-
-## Estrategia de ramas, commits y publicación
-
-- **Rama principal:** `main` (está protegida, solo se integra mediante pull requests)
-- **Ramas de funcionalidad:** `feature/nombre-de-la-funcionalidad`
-- **Ramas de corrección:** `fix/descripcion-del-fix`
-- **Convención de commits:** [Conventional Commits](https://www.conventionalcommits.org/)
-  - `feat:` nueva funcionalidad
-  - `fix:` corrección de error
-  - `docs:` documentación
-  - `style:` formato, punto y coma, etc.
-  - `refactor:` refactorización de código
-  - `test:` pruebas
-  - `chore:` tareas de mantenimiento
-
-## Consideraciones de seguridad y backups
-
-- No commitear nunca archivos `.env` con credenciales reales.
-- `NEXTAUTH_SECRET` debe ser un valor aleatorio y seguro en producción.
-- Las contraseñas de usuarios se almacenan hasheadas (no en texto plano).
-- Realizar backups periódicos de la base de datos PostgreSQL.
-- El acceso a la base de datos debe restringirse a la red interna de la infraestructura.
+    TestService/
+    ├── README.md
+    ├── .gitignore
+    ├── .env.example
+    ├── package.json
+    ├── tsconfig.json
+    ├── next.config.ts
+    ├── tailwind.config.ts
+    ├── postcss.config.js
+    ├── jest.config.js
+    ├── jest.integration.config.js
+    ├── prisma/
+    │   ├── schema.prisma
+    │   └── migrations/
+    ├── docker/
+    │   ├── Dockerfile
+    │   └── compose.yml
+    ├── docs/
+    │   ├── architecture.md
+    │   ├── data-model.md
 
 ## Estado actual del proyecto
 
-### Versión: v1.0.0-beta.5
+### Version: v1.0.0 (Release Candidate)
 
-El proyecto se encuentra en fase **beta**. Se han implementado todos los módulos funcionales:
+El proyecto se encuentra en fase release candidate. Se han implementado todos los modulos funcionales:
 
-### Módulos implementados
+### Modulos implementados
 
-- ✅ **Proyectos** — CRUD completo con búsqueda y paginación
-- ✅ **Módulos** — CRUD con asociación a proyectos
-- ✅ **Versiones** — Gestión de versiones de software por proyecto
-- ✅ **Casos de prueba** — Catálogo con pasos, resultado esperado, prioridad y tipo
-- ✅ **Ciclos de prueba** — Agrupación de ejecuciones por versión
-- ✅ **Ejecuciones** — Registro de resultados con estado y evidencia
-- ✅ **Incidencias (Defectos)** — Reporte de defectos vinculados a ejecuciones
-- ✅ **Aprobaciones UAT** — Aprobaciones por usuarios de negocio
-- ✅ **Usuarios** — Gestión de usuarios con roles
-- ✅ **Autenticación** — Registro, login, logout con sesiones en base de datos
-- ✅ **Dashboard** — Métricas y resumen del estado de testing
-- ✅ **Exportación** — Exportación de datos a CSV (ejecuciones, incidencias, casos de prueba)
-- ✅ **Auditoría** — Log de cambios y acciones (tabla `audit_logs`)
-- ✅ **Middleware** — Protección de rutas (redirige a login si no autenticado)
-- ✅ **Notificaciones** — Alertas de incidencias críticas
+- Proyectos — CRUD completo con busqueda y paginacion
+- Modulos — CRUD con asociacion a proyectos
+- Versiones — Gestion de versiones de software por proyecto
+- Casos de prueba — Catalogo con pasos, resultado esperado, prioridad y tipo
+- Ciclos de prueba — Agrupacion de ejecuciones por version
+- Ejecuciones — Registro de resultados con estado y evidencia
+- Incidencias (Defectos) — Reporte de defectos vinculados a ejecuciones
+- Aprobaciones UAT — Aprobaciones por usuarios de negocio
+- Usuarios — Gestion de usuarios con roles
+- Autenticacion — Registro, login, logout con sesiones en base de datos
+- Dashboard — Metricas y resumen del estado de testing
+- Exportacion — Exportacion de datos a CSV, Excel y PDF
+- Auditoria — Log de cambios y acciones (tabla audit_logs)
+- Middleware — Proteccion de rutas (redirige a login si no autenticado)
+- Notificaciones — Alertas de incidencias criticas
+- Internacionalizacion — Archivos de traduccion es/en
 
 ### Infraestructura
 
-- ✅ Base de datos PostgreSQL 17 configurada y migrada
-- ✅ Docker Compose para despliegue (Dockerfile + compose.yml)
-- ✅ Script de backup de PostgreSQL (`scripts/backup.ps1`)
-- ✅ ESLint + TypeScript configurados
-- ✅ 28 pruebas unitarias pasando
+- Base de datos PostgreSQL 17 configurada y migrada
+- Docker Compose para despliegue (Dockerfile + compose.yml)
+- Script de backup de PostgreSQL (scripts/backup.ps1)
+- Task Scheduler para backup automatico (scripts/setup-backup-task.ps1)
+- ESLint + TypeScript configurados
+- 28 pruebas unitarias pasando
+- 6 pruebas de integracion
 
 ### Funcionalidades pendientes para futuras versiones
 
-- Pruebas de integración con base de datos de test
-- Paginación y filtros avanzados en todos los listados
-- Edición y eliminación en UI para módulos restantes
+- Pruebas de integracion completas (tests para todos los API routes)
+- Edicion y eliminacion en UI para modulos restantes
 - Notificaciones en tiempo real (WebSockets)
-- Exportación avanzada (PDF con gráficos, Excel con formato)
-- Internacionalización (multi-idioma)
-- Auditoría completa (log de todas las acciones)
-- Backup automático programado
-| `npm run dev` | Inicia el servidor de desarrollo con recarga en caliente |
-| `npm run build` | Compila la aplicación para producción |
-| `npm run start` | Inicia el servidor en modo producción |
-| `npm run lint` | Ejecuta ESLint para revisar el código |
-| `npm run test` | Ejecuta todas las pruebas |
-| `npm run test:unit` | Ejecuta pruebas unitarias |
-| `npm run test:integration` | Ejecuta pruebas de integración |
-| `npx prisma generate` | Genera el cliente de Prisma desde el schema |
-| `npx prisma migrate dev` | Ejecuta migraciones en entorno de desarrollo |
-| `npx prisma studio` | Abre la interfaz gráfica de Prisma |
-   ```
+- Exportacion avanzada (PDF con graficos, Excel con formato)
+- Internacionalizacion completa (integrar next-intl)
+- Auditoria completa (log de todas las acciones)
+- Backup automatico programado
 
-4. Editar `.env` con los valores correctos de tu entorno local (especialmente `DATABASE_URL`).
+## Licencia
 
-5. Generar el cliente de Prisma:
-   ```bash
-   npx prisma generate
-   ```
+Este proyecto es de uso privado. Todos los derechos reservados.
+    │   ├── development-setup.md
+    │   ├── deployment.md
+    │   └── vscode-setup.md
+    ├── scripts/
+    │   ├── backup.ps1
+    │   └── setup-backup-task.ps1
+    ├── public/
+    ├── src/
+    │   ├── app/
+    │   │   ├── api/
+    │   │   ├── dashboard/
+    │   │   ├── projects/
+    │   │   ├── modules/
+    │   │   ├── versions/
+    │   │   ├── test-cases/
+    │   │   ├── test-cycles/
+    │   │   ├── executions/
+    │   │   ├── defects/
+    │   │   ├── uat/
+    │   │   ├── users/
+    │   │   ├── login/
+    │   │   └── register/
+    │   ├── components/
+    │   ├── hooks/
+    │   ├── i18n/
+    │   ├── lib/
+    │   └── middleware.ts
+    └── tests/
+        ├── unit/
+        └── integration/
 
-6. Ejecutar migraciones de base de datos:
-   ```bash
-   npx prisma migrate dev --name init
-   ```
+## Estrategia de ramas, commits y publicacion
 
-7. Iniciar el servidor de desarrollo:
-   ```bash
-   npm run dev
-   ```
+- Rama principal: main
+- Ramas de funcionalidad: feature/nombre-de-la-funcionalidad
+- Ramas de correccion: fix/descripcion-del-fix
+- Convencion de commits: Conventional Commits
+  - feat: nueva funcionalidad
+  - fix: correccion de error
+  - docs: documentacion
+  - style: formato, punto y coma, etc.
+  - refactor: refactorizacion de codigo
+  - test: pruebas
+  - chore: tareas de mantenimiento
 
-8. Abrir en el navegador: http://localhost:3000
-| PostgreSQL | Base de datos relacional |
-| Prisma ORM | Mapeo objeto-relacional y migraciones de base de datos |
-| Tailwind CSS | Estilos utilitarios para la interfaz de usuario |
-| Zod | Validación de esquemas |
-| Jest | Framework de pruebas unitarias y de integración |
-TestService es una plataforma diseñada para equipos de calidad y usuarios de negocio que necesitan planificar, ejecutar y hacer seguimiento de pruebas funcionales y de aceptación (UAT). El sistema centraliza la información de casos de prueba, ciclos de prueba, ejecuciones, incidencias y aprobaciones, facilitando la trazabilidad y la toma de decisiones antes de cada release.
+## Consideraciones de seguridad y backups
+
+- No commitear nunca archivos .env con credenciales reales.
+- NEXTAUTH_SECRET debe ser un valor aleatorio y seguro en produccion.
+- Las contrasenas de usuarios se almacenan hasheadas (bcryptjs).
+- Realizar backups periodicos de la base de datos PostgreSQL.
+- El acceso a la base de datos debe restringirse a la red interna de la infraestructura.
+- Script de backup disponible en scripts/backup.ps1.
+
+### 5. Generar el cliente de Prisma
+
+    npx prisma generate
+
+### 6. Ejecutar migraciones de base de datos
+
+    npx prisma migrate dev --name init
+
+### 7. Iniciar el servidor de desarrollo
+
+    npm run dev
+
+### 8. Abrir en el navegador
+
+http://localhost:3000
