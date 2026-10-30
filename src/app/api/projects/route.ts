@@ -2,24 +2,49 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createProjectSchema } from "@/lib/validations/project";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const projects = await prisma.project.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        _count: {
-          select: { modules: true, testCases: true, executions: true },
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "10")));
+    const search = searchParams.get("search") || "";
+    const skip = (page - 1) * limit;
+
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" as const } },
+            { key: { contains: search, mode: "insensitive" as const } },
+            { description: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : {};
+
+    const [projects, total] = await Promise.all([
+      prisma.project.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          _count: { select: { modules: true, testCases: true, executions: true } },
         },
+      }),
+      prisma.project.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      data: projects,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     });
-
-    return NextResponse.json(projects);
   } catch (error) {
     console.error("Error al obtener proyectos:", error);
-    return NextResponse.json(
-      { error: "Error al obtener los proyectos" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error al obtener los proyectos" }, { status: 500 });
   }
 }
 

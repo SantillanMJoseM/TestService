@@ -188,3 +188,19 @@ model VerificationToken {
   @@unique([identifier, token])
   @@map("verification_tokens")
 }
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  entity    String
+  entityId  String?
+  userId    String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
