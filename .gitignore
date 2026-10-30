@@ -18,6 +18,7 @@ prisma/*.migrations.lock
 .env.development.local
 .env.test.local
 .env.production.local
+docker/.env
 *.pem
 
 # Depuración
