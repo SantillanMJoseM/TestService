@@ -2,11 +2,9 @@
 
 # TestService - Script de despliegue/actualizacion
 # Ejecutar como: bash scripts/deploy.sh
-# Actualiza la aplicacion sin perder datos ni configuracion
 
 set -e
 
-# Colores
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -17,12 +15,11 @@ echo "  TestService - Despliegue"
 echo "========================================"
 echo ""
 
-# 1. Verificar que se ejecuta desde la instalacion correcta
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 if [ ! -f "$PROJECT_DIR/package.json" ]; then
-    echo -e "${RED}ERROR: No se encontro package.json. Ejecutar desde el directorio del proyecto.${NC}"
+    echo -e "${RED}ERROR: No se encontro package.json.${NC}"
     exit 1
 fi
 
@@ -30,22 +27,19 @@ cd "$PROJECT_DIR"
 echo "Directorio del proyecto: $PROJECT_DIR"
 echo ""
 
-# 2. Comprobar la existencia del archivo .env
 if [ ! -f ".env" ]; then
     echo -e "${RED}ERROR: No se encontro el archivo .env.${NC}"
     echo "Ejecutar primero: bash scripts/install.sh"
     exit 1
 fi
 
-# Verificar permisos de .env
 ENV_PERMS=$(stat -c %a .env 2>/dev/null || stat -f %Lp .env 2>/dev/null)
 if [ "$ENV_PERMS" != "600" ] && [ "$ENV_PERMS" != "400" ]; then
-    echo -e "${YELLOW}ADVERTENCIA: Los permisos de .env no son restrictivos ($ENV_PERMS). Recomendado: 600.${NC}"
+    echo -e "${YELLOW}ADVERTENCIA: Permisos de .env no restrictivos ($ENV_PERMS). Recomendado: 600.${NC}"
     chmod 600 .env
     echo "Permisos corregidos a 600."
 fi
 
-# 3. Validar variables obligatorias
 echo "Validando variables de entorno..."
 source .env
 
@@ -65,7 +59,7 @@ if [ "$POSTGRES_PASSWORD" = "postgres" ] || [ "$POSTGRES_PASSWORD" = "password" 
 fi
 
 if [ "$NEXTAUTH_SECRET" = "cambiar-por-un-secreto-seguro-en-produccion" ] || [ -z "$NEXTAUTH_SECRET" ]; then
-    echo -e "${RED}ERROR: NEXTAUTH_SECRET no esta configurado. Generar con: openssl rand -base64 32${NC}"
+    echo -e "${RED}ERROR: NEXTAUTH_SECRET no esta configurado.${NC}"
     MISSING=1
 fi
 
@@ -77,7 +71,6 @@ fi
 echo -e "${GREEN}Variables de entorno validas.${NC}"
 echo ""
 
-# 4. Verificar configuracion de Docker Compose
 echo "Validando configuracion de Docker Compose..."
 if ! docker compose -f docker/compose.yml config > /dev/null 2>&1; then
     echo -e "${RED}ERROR: Configuracion de Docker Compose invalida.${NC}"
@@ -87,7 +80,6 @@ fi
 echo -e "${GREEN}Configuracion valida.${NC}"
 echo ""
 
-# 5. Verificar que no existan modificaciones locales inesperadas
 echo "Verificando estado del repositorio..."
 if [ -d ".git" ]; then
     UNTRACKED=$(git status --porcelain 2>/dev/null | grep -v '^?? \.env' | grep -v '^?? docker/\.env' | grep -v '^ M \.env' | grep -v '^ M docker/\.env' || true)
@@ -113,6 +105,14 @@ if [ -d ".git" ]; then
     if ! git fetch origin; then
         echo -e "${RED}ERROR: Fallo al ejecutar git fetch.${NC}"
         exit 1
+    fi
+    if ! git pull origin main; then
+        echo -e "${RED}ERROR: Fallo al ejecutar git pull.${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}Repositorio actualizado.${NC}"
+    echo ""
+fi
 
 # 7. Reconstruir la imagen de la aplicacion
 echo "Reconstruyendo imagen de la aplicacion..."
@@ -196,11 +196,3 @@ echo "  Ver logs:     docker compose -f docker/compose.yml logs -f"
 echo "  Detener:      docker compose -f docker/compose.yml down"
 echo "  Backup DB:    bash scripts/backup.sh"
 echo ""
-    fi
-    if ! git pull origin main; then
-        echo -e "${RED}ERROR: Fallo al ejecutar git pull.${NC}"
-        exit 1
-    fi
-    echo -e "${GREEN}Repositorio actualizado.${NC}"
-    echo ""
-fi
