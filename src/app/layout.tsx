@@ -16,16 +16,36 @@ export default function RootLayout({
     <html lang="es">
       <body className="min-h-screen bg-gray-50">
         <nav className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-            <Link href="/" className="text-xl font-bold text-blue-600">
-              TestService
-            </Link>
-            <div className="flex gap-4">
-              <Link
-                href="/projects"
-                className="text-gray-600 hover:text-gray-900 text-sm font-medium"
-              >
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between mb-2">
+              <Link href="/" className="text-xl font-bold text-blue-600">
+                TestService
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2 text-sm">
+              <Link href="/projects" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
                 Proyectos
+              </Link>
+              <Link href="/modules" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
+                Módulos
+              </Link>
+              <Link href="/versions" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
+                Versiones
+              </Link>
+              <Link href="/test-cases" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
+                Casos de prueba
+              </Link>
+              <Link href="/test-cycles" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
+                Ciclos
+              </Link>
+              <Link href="/executions" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
+                Ejecuciones
+              </Link>
+              <Link href="/defects" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
+                Incidencias
+              </Link>
+              <Link href="/uat" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
+                UAT
               </Link>
             </div>
           </div>
