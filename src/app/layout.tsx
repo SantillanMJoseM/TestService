@@ -31,6 +31,9 @@ export default function RootLayout({
               </div>
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
+              <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
+                Dashboard
+              </Link>
               <Link href="/projects" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
                 Proyectos
               </Link>
@@ -54,6 +57,9 @@ export default function RootLayout({
               </Link>
               <Link href="/uat" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
                 UAT
+              </Link>
+              <Link href="/users" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
+                Usuarios
               </Link>
             </div>
           </div>
