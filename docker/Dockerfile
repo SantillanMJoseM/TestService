@@ -1,6 +1,13 @@
+# ============================================================
+# TestService - Dockerfile definitivo
+# Debian Slim + Node.js 20 + OpenSSL 3 + Prisma 5.22
+# ============================================================
+
 FROM node:20-slim AS base
 
-# Instalar OpenSSL 3 y dependencias del sistema
+# -----------------------------------------------------------
+# Etapa 1: Dependencias
+# -----------------------------------------------------------
 FROM base AS deps
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -12,7 +19,9 @@ COPY package.json package-lock.json ./
 RUN rm -rf node_modules/.prisma
 RUN npm ci --legacy-peer-deps
 
-# Construir la aplicacion
+# -----------------------------------------------------------
+# Etapa 2: Construccion
+# -----------------------------------------------------------
 FROM base AS builder
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -23,6 +32,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Eliminar cualquier motor Prisma preexistente y regenerar desde cero
 RUN rm -rf node_modules/.prisma
 RUN npx prisma generate
 # Eliminar cualquier motor musl que se haya generado accidentalmente
@@ -37,7 +47,9 @@ RUN echo "=== Prisma engine check ===" && \
     fi
 RUN npm run build
 
-# Imagen de produccion
+# -----------------------------------------------------------
+# Etapa 3: Produccion
+# -----------------------------------------------------------
 FROM base AS runner
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -51,10 +63,13 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN groupadd --system --gid 1001 nodejs
 RUN useradd --system --uid 1001 nextjs
 
+# Copiar archivos de la aplicacion
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
+
+# Copiar Prisma Client generado (motor Debian) y CLI
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
@@ -63,6 +78,7 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 RUN echo "=== FINAL VALIDATION ===" && \
     echo "--- OS ---" && cat /etc/os-release | grep -E "^(NAME|VERSION)=" && \
     echo "--- OpenSSL ---" && openssl version && \
+    echo "--- Prisma CLI ---" && node /app/node_modules/prisma/build/index.js --version && \
     echo "--- Prisma engine ---" && ls /app/node_modules/.prisma/client/libquery_engine* && \
     if ls /app/node_modules/.prisma/client/libquery_engine-linux-musl* 1>/dev/null 2>&1; then \
       echo "ERROR: musl engine in final image" && exit 1; \

@@ -124,7 +124,7 @@ echo ""
 
 # 7. Ejecutar migraciones
 echo "Ejecutando migraciones de Prisma..."
-docker compose -f docker/compose.yml exec -T app npx prisma migrate deploy
+docker compose -f docker/compose.yml exec -T app node /app/node_modules/prisma/build/index.js migrate deploy
 if [ $? -ne 0 ]; then
     echo -e "${RED}ERROR: Fallo al ejecutar migraciones.${NC}"
     exit 1
