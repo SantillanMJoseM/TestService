@@ -1,0 +1,50 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "search": "Buscar",
+    "back": "Volver",
+    "yes": "Sí",
+    "no": "No",
+    "error": "Error",
+    "success": "Éxito"
+  },
+  "nav": {
+    "home": "Inicio",
+    "projects": "Proyectos",
+    "modules": "Módulos",
+    "versions": "Versiones",
+    "testCases": "Casos de prueba",
+    "testCycles": "Ciclos",
+    "executions": "Ejecuciones",
+    "defects": "Incidencias",
+    "uat": "UAT",
+    "users": "Usuarios",
+    "dashboard": "Dashboard",
+    "login": "Iniciar sesión",
+    "register": "Registrarse"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
+    "email": "Email",
+    "fullName": "Nombre completo",
+    "role": "Rol"
+  },
+  "projects": {
+    "title": "Proyectos",
+    "new": "Nuevo proyecto",
+    "name": "Nombre",
+    "key": "Clave",
+    "description": "Descripción",
+    "modules": "Módulos",
+    "testCases": "Casos de prueba",
+    "executions": "Ejecuciones"
+  }
+}

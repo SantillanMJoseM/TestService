@@ -1,0 +1,50 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "back": "Back",
+    "yes": "Yes",
+    "no": "No",
+    "error": "Error",
+    "success": "Success"
+  },
+  "nav": {
+    "home": "Home",
+    "projects": "Projects",
+    "modules": "Modules",
+    "versions": "Versions",
+    "testCases": "Test Cases",
+    "testCycles": "Test Cycles",
+    "executions": "Executions",
+    "defects": "Defects",
+    "uat": "UAT",
+    "users": "Users",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "register": "Register"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "username": "Username",
+    "password": "Password",
+    "email": "Email",
+    "fullName": "Full Name",
+    "role": "Role"
+  },
+  "projects": {
+    "title": "Projects",
+    "new": "New Project",
+    "name": "Name",
+    "key": "Key",
+    "description": "Description",
+    "modules": "Modules",
+    "testCases": "Test Cases",
+    "executions": "Executions"
+  }
+}
