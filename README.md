@@ -258,6 +258,10 @@ Este proyecto es de uso privado. Todos los derechos reservados.
 
     npx prisma migrate dev --name init
 
+> Nota: En produccion (Docker), las migraciones se ejecutan automaticamente
+> mediante scripts/install.sh o scripts/deploy.sh, NO desde docker-compose.yml.
+> El comando de inicio de la aplicacion es solo "node server.js".
+
 ### 7. Iniciar el servidor de desarrollo
 
     npm run dev
