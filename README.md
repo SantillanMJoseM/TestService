@@ -154,30 +154,48 @@ TestService/
 - Realizar backups periódicos de la base de datos PostgreSQL.
 - El acceso a la base de datos debe restringirse a la red interna de la infraestructura.
 
-## Estado actual del proyecto y funcionalidades pendientes
+## Estado actual del proyecto
 
-### Estado: Inicialización
+### Versión: v1.0.0-beta.5
 
-El proyecto se encuentra en fase de inicialización. Se han creado:
+El proyecto se encuentra en fase **beta**. Se han implementado todos los módulos funcionales:
 
-- Estructura de carpetas base
-- Archivos de configuración (Next.js, TypeScript, Prisma)
-- Schema de base de datos con Prisma
-- Documentación inicial (README, arquitectura, modelo de datos, setup, despliegue)
+### Módulos implementados
 
-### Funcionalidades pendientes (no implementadas en esta entrega)
+- ✅ **Proyectos** — CRUD completo con búsqueda y paginación
+- ✅ **Módulos** — CRUD con asociación a proyectos
+- ✅ **Versiones** — Gestión de versiones de software por proyecto
+- ✅ **Casos de prueba** — Catálogo con pasos, resultado esperado, prioridad y tipo
+- ✅ **Ciclos de prueba** — Agrupación de ejecuciones por versión
+- ✅ **Ejecuciones** — Registro de resultados con estado y evidencia
+- ✅ **Incidencias (Defectos)** — Reporte de defectos vinculados a ejecuciones
+- ✅ **Aprobaciones UAT** — Aprobaciones por usuarios de negocio
+- ✅ **Usuarios** — Gestión de usuarios con roles
+- ✅ **Autenticación** — Registro, login, logout con sesiones en base de datos
+- ✅ **Dashboard** — Métricas y resumen del estado de testing
+- ✅ **Exportación** — Exportación de datos a CSV (ejecuciones, incidencias, casos de prueba)
+- ✅ **Auditoría** — Log de cambios y acciones (tabla `audit_logs`)
+- ✅ **Middleware** — Protección de rutas (redirige a login si no autenticado)
+- ✅ **Notificaciones** — Alertas de incidencias críticas
 
-- Implementación de rutas y páginas de la aplicación (`src/app`)
-- Componentes de interfaz de usuario (`src/components`)
-- Lógica de negocio por feature (`src/features/*`)
-- Capa de servicios y utilidades (`src/lib`, `src/services`)
-- Tipos compartidos (`src/types`)
-- Estilos globales (`src/styles`)
-- Pruebas unitarias y de integración (`tests/*`)
-- Autenticación completa con NextAuth o similar
-- Docker Compose para despliegue en Linux
+### Infraestructura
 
-> Esta base está lista para comenzar el desarrollo de las funcionalidades descritas arriba.
+- ✅ Base de datos PostgreSQL 17 configurada y migrada
+- ✅ Docker Compose para despliegue (Dockerfile + compose.yml)
+- ✅ Script de backup de PostgreSQL (`scripts/backup.ps1`)
+- ✅ ESLint + TypeScript configurados
+- ✅ 28 pruebas unitarias pasando
+
+### Funcionalidades pendientes para futuras versiones
+
+- Pruebas de integración con base de datos de test
+- Paginación y filtros avanzados en todos los listados
+- Edición y eliminación en UI para módulos restantes
+- Notificaciones en tiempo real (WebSockets)
+- Exportación avanzada (PDF con gráficos, Excel con formato)
+- Internacionalización (multi-idioma)
+- Auditoría completa (log de todas las acciones)
+- Backup automático programado
 | `npm run dev` | Inicia el servidor de desarrollo con recarga en caliente |
 | `npm run build` | Compila la aplicación para producción |
 | `npm run start` | Inicia el servidor en modo producción |
