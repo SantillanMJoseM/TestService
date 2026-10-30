@@ -1,7 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
@@ -9,4 +11,11 @@ body {
     Arial, sans-serif;
   line-height: 1.5;
   color: #333;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
