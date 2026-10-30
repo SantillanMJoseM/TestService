@@ -142,7 +142,7 @@ Copiar .env.example a .env y completar los valores:
 
 ## Estado actual del proyecto
 
-### Version: v1.0.0 (Release Candidate)
+### Version: v1.0.0-rc.6 (Release Candidate)
 
 El proyecto se encuentra en fase release candidate. Se han implementado todos los modulos funcionales:
 
@@ -184,6 +184,14 @@ El proyecto se encuentra en fase release candidate. Se han implementado todos lo
 - Internacionalizacion completa (integrar next-intl)
 - Auditoria completa (log de todas las acciones)
 - Backup automatico programado
+
+### Correcciones aplicadas en RC6
+
+- Corregida estructura del bloque if en install.sh
+- Corregido grep -v con || true en deploy.sh
+- Reubicado manejo de errores de Git en deploy.sh
+- Migraciones ejecutadas solo desde scripts (no desde compose.yml)
+- Validacion de sintaxis bash con bash -n para todos los scripts
 
 ## Licencia
 
