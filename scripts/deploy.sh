@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# TestService - Script de despliegue/actualización
+# TestService - Script de despliegue/actualizacion
 # Ejecutar como: bash scripts/deploy.sh
-# Actualiza la aplicación sin perder datos ni configuración
+# Actualiza la aplicacion sin perder datos ni configuracion
 
 set -e
 
@@ -17,12 +17,12 @@ echo "  TestService - Despliegue"
 echo "========================================"
 echo ""
 
-# 1. Verificar que se ejecuta desde la instalación correcta
+# 1. Verificar que se ejecuta desde la instalacion correcta
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 if [ ! -f "$PROJECT_DIR/package.json" ]; then
-    echo -e "${RED}ERROR: No se encontró package.json. Ejecutar desde el directorio del proyecto.${NC}"
+    echo -e "${RED}ERROR: No se encontro package.json. Ejecutar desde el directorio del proyecto.${NC}"
     exit 1
 fi
 
@@ -32,7 +32,7 @@ echo ""
 
 # 2. Comprobar la existencia del archivo .env
 if [ ! -f ".env" ]; then
-    echo -e "${RED}ERROR: No se encontró el archivo .env.${NC}"
+    echo -e "${RED}ERROR: No se encontro el archivo .env.${NC}"
     echo "Ejecutar primero: bash scripts/install.sh"
     exit 1
 fi
@@ -55,18 +55,17 @@ MISSING=0
 for var in "${REQUIRED_VARS[@]}"; do
     value="${!var}"
     if [ -z "$value" ]; then
-        echo -e "${RED}ERROR: Variable obligatoria $var no está definida.${NC}"
+        echo -e "${RED}ERROR: Variable obligatoria $var no esta definida.${NC}"
         MISSING=1
     fi
 done
 
-# Validar que las contraseñas no sean valores por defecto inseguros
 if [ "$POSTGRES_PASSWORD" = "postgres" ] || [ "$POSTGRES_PASSWORD" = "password" ]; then
     echo -e "${YELLOW}ADVERTENCIA: POSTGRES_PASSWORD usa un valor inseguro por defecto.${NC}"
 fi
 
 if [ "$NEXTAUTH_SECRET" = "cambiar-por-un-secreto-seguro-en-produccion" ] || [ -z "$NEXTAUTH_SECRET" ]; then
-    echo -e "${RED}ERROR: NEXTAUTH_SECRET no está configurado. Generar con: openssl rand -base64 32${NC}"
+    echo -e "${RED}ERROR: NEXTAUTH_SECRET no esta configurado. Generar con: openssl rand -base64 32${NC}"
     MISSING=1
 fi
 
@@ -75,23 +74,23 @@ if [ $MISSING -eq 1 ]; then
     exit 1
 fi
 
-echo -e "${GREEN}Variables de entorno válidas.${NC}"
+echo -e "${GREEN}Variables de entorno validas.${NC}"
 echo ""
 
-# 4. Verificar configuración de Docker Compose
-echo "Validando configuración de Docker Compose..."
+# 4. Verificar configuracion de Docker Compose
+echo "Validando configuracion de Docker Compose..."
 if ! docker compose -f docker/compose.yml config > /dev/null 2>&1; then
-    echo -e "${RED}ERROR: Configuración de Docker Compose inválida.${NC}"
+    echo -e "${RED}ERROR: Configuracion de Docker Compose invalida.${NC}"
     docker compose -f docker/compose.yml config
     exit 1
 fi
-echo -e "${GREEN}Configuración válida.${NC}"
+echo -e "${GREEN}Configuracion valida.${NC}"
 echo ""
 
 # 5. Verificar que no existan modificaciones locales inesperadas
 echo "Verificando estado del repositorio..."
 if [ -d ".git" ]; then
-    UNTRACKED=$(git status --porcelain | grep -v '^?? \.env' | grep -v '^?? docker/\.env' | grep -v '^ M \.env' | grep -v '^ M docker/\.env')
+    UNTRACKED=$(git status --porcelain 2>/dev/null | grep -v '^?? \.env' | grep -v '^?? docker/\.env' | grep -v '^ M \.env' | grep -v '^ M docker/\.env' || true)
     if [ -n "$UNTRACKED" ]; then
         echo -e "${YELLOW}ADVERTENCIA: Hay cambios locales sin commitear:${NC}"
         echo "$UNTRACKED"
@@ -104,19 +103,20 @@ if [ -d ".git" ]; then
     fi
     echo -e "${GREEN}Estado del repositorio verificado.${NC}"
 else
-    echo -e "${YELLOW}No es un repositorio Git. Saltando verificación.${NC}"
+    echo -e "${YELLOW}No es un repositorio Git. Saltando verificacion.${NC}"
 fi
 echo ""
 
-# 6. Obtener la última versión del repositorio
+# 6. Obtener la ultima version del repositorio
 if [ -d ".git" ]; then
-    echo "Obteniendo última versión del repositorio..."
-    git fetch origin
-    git pull origin main
+    echo "Obteniendo ultima version del repositorio..."
+    if ! git fetch origin; then
+        echo -e "${RED}ERROR: Fallo al ejecutar git fetch.${NC}"
+        exit 1
 
-# 7. Reconstruir la imagen de la aplicación
-echo "Reconstruyendo imagen de la aplicación..."
-docker compose -f docker/compose.yml build --no-cache app
+# 7. Reconstruir la imagen de la aplicacion
+echo "Reconstruyendo imagen de la aplicacion..."
+docker compose -f docker/compose.yml build app
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}ERROR: Fallo al construir la imagen.${NC}"
@@ -125,8 +125,8 @@ fi
 echo -e "${GREEN}Imagen construida.${NC}"
 echo ""
 
-# 8. Levantar los servicios sin eliminar los volúmenes
-echo "Levantando servicios (sin eliminar volúmenes)..."
+# 8. Levantar los servicios sin eliminar los volumenes
+echo "Levantando servicios (sin eliminar volumenes)..."
 docker compose -f docker/compose.yml up -d
 
 if [ $? -ne 0 ]; then
@@ -136,13 +136,13 @@ fi
 echo -e "${GREEN}Servicios levantados.${NC}"
 echo ""
 
-# 9. Esperar a que PostgreSQL esté saludable
-echo "Esperando a que PostgreSQL esté saludable..."
+# 9. Esperar a que PostgreSQL este saludable
+echo "Esperando a que PostgreSQL este saludable..."
 MAX_WAIT=60
 WAITED=0
 while [ $WAITED -lt $MAX_WAIT ]; do
     if docker compose -f docker/compose.yml exec -T postgres pg_isready -U "$POSTGRES_USER" > /dev/null 2>&1; then
-        echo -e "${GREEN}PostgreSQL está saludable.${NC}"
+        echo -e "${GREEN}PostgreSQL esta saludable.${NC}"
         break
     fi
     sleep 2
@@ -150,7 +150,7 @@ while [ $WAITED -lt $MAX_WAIT ]; do
 done
 
 if [ $WAITED -ge $MAX_WAIT ]; then
-    echo -e "${RED}ERROR: PostgreSQL no respondió en $MAX_WAIT segundos.${NC}"
+    echo -e "${RED}ERROR: PostgreSQL no respondio en $MAX_WAIT segundos.${NC}"
     echo "Verificar logs: docker compose -f docker/compose.yml logs postgres"
     exit 1
 fi
@@ -169,14 +169,14 @@ echo -e "${GREEN}Migraciones aplicadas.${NC}"
 echo ""
 
 # 11. Verificar que Next.js responda correctamente
-echo "Verificando funcionamiento de la aplicación..."
+echo "Verificando funcionamiento de la aplicacion..."
 sleep 5
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${APP_PORT:-3000}" 2>/dev/null || echo "000")
 
 if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "307" ] || [ "$HTTP_STATUS" = "302" ]; then
-    echo -e "${GREEN}Aplicación respondiendo correctamente (HTTP $HTTP_STATUS).${NC}"
+    echo -e "${GREEN}Aplicacion respondiendo correctamente (HTTP $HTTP_STATUS).${NC}"
 else
-    echo -e "${YELLOW}ADVERTENCIA: La aplicación respondió con HTTP $HTTP_STATUS.${NC}"
+    echo -e "${YELLOW}ADVERTENCIA: La aplicacion respondio con HTTP $HTTP_STATUS.${NC}"
     echo "Verificar logs: docker compose -f docker/compose.yml logs app"
 fi
 echo ""
@@ -189,16 +189,16 @@ echo ""
 echo "Servicios:"
 docker compose -f docker/compose.yml ps
 echo ""
-echo "Acceder a la aplicación en: http://localhost:${APP_PORT:-3000}"
+echo "Acceder a la aplicacion en: http://localhost:${APP_PORT:-3000}"
 echo ""
-echo "Comandos útiles:"
+echo "Comandos utiles:"
 echo "  Ver logs:     docker compose -f docker/compose.yml logs -f"
 echo "  Detener:      docker compose -f docker/compose.yml down"
 echo "  Backup DB:    bash scripts/backup.sh"
 echo ""
-
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}ERROR: Fallo al obtener actualizaciones.${NC}"
+    fi
+    if ! git pull origin main; then
+        echo -e "${RED}ERROR: Fallo al ejecutar git pull.${NC}"
         exit 1
     fi
     echo -e "${GREEN}Repositorio actualizado.${NC}"

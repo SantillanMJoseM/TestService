@@ -2,7 +2,6 @@
 
 # TestService - Script de instalacion inicial
 # Ejecutar como: bash scripts/install.sh
-# NO ejecutar como root en produccion
 
 set -e
 
@@ -40,7 +39,6 @@ for tool in docker git openssl curl; do
     fi
 done
 
-# Verificar Docker Compose
 if ! docker compose version &> /dev/null; then
     echo -e "${RED}ERROR: Docker Compose no esta disponible.${NC}"
     MISSING_TOOLS=1
@@ -76,16 +74,13 @@ if [ ! -f ".env" ]; then
     fi
     cp .env.example .env
 
-    # Generar contrasenas seguras
     POSTGRES_PASSWORD=$(openssl rand -base64 24 | tr -d '/+=' | head -c 24)
     NEXTAUTH_SECRET=$(openssl rand -base64 32 | tr -d '/+=' | head -c 32)
 
-    # Solicitar IP/URL de acceso
     echo ""
     read -p "Ingrese la IP o URL de acceso (ej: 192.168.1.22 o localhost) [localhost]: " ACCESS_IP
     ACCESS_IP=${ACCESS_IP:-localhost}
 
-    # Actualizar .env con valores generados
     sed -i "s/^POSTGRES_USER=$/POSTGRES_USER=postgres/" .env
     sed -i "s/^POSTGRES_PASSWORD=$/POSTGRES_PASSWORD=$POSTGRES_PASSWORD/" .env
     sed -i "s/^POSTGRES_DB=testing_uat/POSTGRES_DB=testing_uat/" .env
@@ -94,13 +89,12 @@ if [ ! -f ".env" ]; then
     sed -i "s/^NEXT_PUBLIC_APP_URL=.*/NEXT_PUBLIC_APP_URL=http:\/\/$ACCESS_IP:3000/" .env
     sed -i "s/^APP_PORT=3000/APP_PORT=3000/" .env
 
-    # Aplicar permisos restringidos
     chmod 600 .env
 
     echo ""
     echo -e "${GREEN}.env creado con credenciales generadas automaticamente.${NC}"
     echo -e "${YELLOW}IMPORTANTE: Guardar las credenciales en un lugar seguro.${NC}"
-    echo -e "${YELLOW}El archivo .env tiene permisos 600 (solo lectura/escritura del propietario).${NC}"
+    echo -e "${YELLOW}El archivo .env tiene permisos 600.${NC}"
     echo ""
 else
     echo -e "${GREEN}.env existente conservado. No se modificaron credenciales.${NC}"
@@ -122,8 +116,7 @@ for var in "${REQUIRED_VARS[@]}"; do
     fi
 done
 
-# Validar que las contrasenas no sean valores por defecto inseguros
-if [ "$POSTGRES_PASSWORD" = "postgres" ] || [ "$POSTGRES_PASSWORD" = "password" ] || [ "$POSTGRES_PASSWORD" = "cambiar-por-contrasena-segura" ]; then
+if [ "$POSTGRES_PASSWORD" = "postgres" ] || [ "$POSTGRES_PASSWORD" = "password" ]; then
     echo -e "${RED}ERROR: POSTGRES_PASSWORD usa un valor inseguro por defecto.${NC}"
     MISSING=1
 fi
@@ -145,6 +138,11 @@ echo ""
 echo "Validando configuracion de Docker Compose..."
 if ! docker compose -f docker/compose.yml config > /dev/null 2>&1; then
     echo -e "${RED}ERROR: Configuracion de Docker Compose invalida.${NC}"
+    docker compose -f docker/compose.yml config
+    exit 1
+fi
+echo -e "${GREEN}Configuracion valida.${NC}"
+echo ""
 
 # 7. Construir e iniciar servicios
 echo "Construyendo e iniciando servicios..."
@@ -212,9 +210,4 @@ echo "  Ver logs:     docker compose -f docker/compose.yml logs -f"
 echo "  Detener:      docker compose -f docker/compose.yml down"
 echo "  Actualizar:   bash scripts/deploy.sh"
 echo "  Backup DB:    bash scripts/backup.sh"
-echo ""
-    docker compose -f docker/compose.yml config
-    exit 1
-fi
-echo -e "${GREEN}Configuracion valida.${NC}"
 echo ""
