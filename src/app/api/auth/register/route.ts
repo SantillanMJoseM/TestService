@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashPassword, createSession, createSessionCookie } from "@/lib/auth";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -8,7 +8,10 @@ const registerSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
   fullName: z.string().min(1, "El nombre completo es obligatorio").max(100),
-  role: z.enum(["Admin", "Tester", "BusinessUser", "Viewer"]).default("Tester"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmPassword"],
 });
 
 export async function POST(request: NextRequest) {
@@ -16,6 +19,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = registerSchema.parse(body);
 
+    // Check for duplicate username or email in users
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [{ username: validatedData.username }, { email: validatedData.email }],
@@ -29,40 +33,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const passwordHash = await hashPassword(validatedData.password);
+    // Check for duplicate in registration requests
+    const existingRequest = await prisma.registrationRequest.findFirst({
+      where: {
+        OR: [{ username: validatedData.username }, { email: validatedData.email }],
+      },
+    });
 
-    const user = await prisma.user.create({
+    if (existingRequest) {
+      return NextResponse.json(
+        { error: "Ya existe una solicitud de registro con ese nombre de usuario o email" },
+        { status: 409 }
+      );
+    }
+
+    const passwordHash = await bcrypt.hash(validatedData.password, 10);
+
+    const request_ = await prisma.registrationRequest.create({
       data: {
         username: validatedData.username,
         email: validatedData.email,
         passwordHash,
         fullName: validatedData.fullName,
-        role: validatedData.role,
+        status: "Pending",
       },
     });
 
-    const sessionToken = await createSession(user.id);
-
-    const response = NextResponse.json(
-      {
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          fullName: user.fullName,
-          role: user.role,
-        },
-      },
+    return NextResponse.json(
+      { message: "Solicitud de registro enviada. Un administrador la revisará.", id: request_.id },
       { status: 201 }
     );
-
-    response.headers.set("Set-Cookie", createSessionCookie(sessionToken));
-    return response;
   } catch (error) {
     if (error instanceof Error && error.name === "ZodError") {
       return NextResponse.json({ error: "Datos inválidos", details: error.message }, { status: 400 });
     }
-    console.error("Error al registrar usuario:", error);
-    return NextResponse.json({ error: "Error al registrar el usuario" }, { status: 500 });
+    console.error("Error al registrar:", error);
+    return NextResponse.json({ error: "Error al registrar" }, { status: 500 });
   }
 }

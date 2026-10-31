@@ -10,6 +10,7 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "prisma db seed",
     "prisma:studio": "prisma studio",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -28,8 +29,10 @@
     "xlsx": "^0.18.5",
     "zod": "3.24.0"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.7",
     "@testing-library/jest-dom": "6.0.0",
     "@testing-library/react": "^16.1.0",
     "@types/bcryptjs": "^2.4.6",

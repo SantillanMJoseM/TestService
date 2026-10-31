@@ -24,6 +24,7 @@ model Project {
   executions  Execution[]
   defects     Defect[]
   uatApprovals UatApproval[]
+  userProjects UserProject[]
 
   @@map("projects")
 }
@@ -140,18 +141,23 @@ model Defect {
 }
 
 model User {
-  id          String   @id @default(uuid())
-  username    String   @unique
-  email       String   @unique
-  passwordHash String
-  role        String   @default("User") // Admin, Tester, BusinessUser, Viewer
-  fullName    String
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String   @id @default(uuid())
+  username          String   @unique
+  email             String   @unique
+  passwordHash      String
+  fullName          String
+  role              String   @default("User")
+  roleId            String?
+  roleRef           Role?    @relation(fields: [roleId], references: [id])
+  status            String   @default("Active")
+  mustChangePassword Boolean @default(false)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  uatApprovals UatApproval[]
-  sessions     Session[]
+  uatApprovals      UatApproval[]
+  sessions          Session[]
+  projectAssignments UserProject[]
 
   @@map("users")
 }
@@ -205,4 +211,70 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([userId])
   @@index([createdAt])
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  section     String
+  action      String
+  description String?
+  createdAt   DateTime @default(now())
+
+  roles       RolePermission[]
+
+  @@unique([section, action])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserProject {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, projectId])
+  @@map("user_projects")
+}
+
+model RegistrationRequest {
+  id            String   @id @default(uuid())
+  username      String   @unique
+  email         String   @unique
+  passwordHash  String
+  fullName      String
+  status        String   @default("Pending")
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  roleAssigned  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("registration_requests")
 }

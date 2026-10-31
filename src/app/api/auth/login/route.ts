@@ -15,21 +15,29 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { username: validatedData.username },
+      include: { roleRef: true },
     });
 
     if (!user || !user.isActive) {
+      return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
+    }
+
+    // Check user status
+    if (user.status !== "Active") {
+      const statusMessages: Record<string, string> = {
+        Pending: "Tu cuenta está pendiente de aprobación por un administrador",
+        Rejected: "Tu cuenta ha sido rechazada",
+        Suspended: "Tu cuenta ha sido suspendida",
+      };
       return NextResponse.json(
-        { error: "Credenciales inválidas" },
-        { status: 401 }
+        { error: statusMessages[user.status] || "Cuenta no activa" },
+        { status: 403 }
       );
     }
 
     const isValid = await verifyPassword(validatedData.password, user.passwordHash);
     if (!isValid) {
-      return NextResponse.json(
-        { error: "Credenciales inválidas" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
     }
 
     const sessionToken = await createSession(user.id);
@@ -41,6 +49,8 @@ export async function POST(request: NextRequest) {
         email: user.email,
         fullName: user.fullName,
         role: user.role,
+        roleId: user.roleId,
+        mustChangePassword: user.mustChangePassword,
       },
     });
 

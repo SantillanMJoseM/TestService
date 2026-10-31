@@ -44,7 +44,7 @@ services:
     ports:
       - "${APP_PORT:-3000}:3000"
     command: >
-      sh -c "node server.js"
+      sh -c "node /app/node_modules/prisma/build/index.js migrate deploy && node /app/prisma/seed.js && node server.js"
 
 volumes:
   postgres_data:
