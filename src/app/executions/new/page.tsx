@@ -12,7 +12,7 @@ export default function NewExecutionPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { fetch("/api/projects").then(r => r.json()).then(data => setProjects(data.data || [])); }, []);
-  useEffect(() => { if (form.projectId) { fetch(`/api/test-cases?projectId=${form.projectId}`).then(r => r.json()).then(setTestCases); fetch(`/api/test-cycles?projectId=${form.projectId}`).then(r => r.json()).then(setTestCycles); } }, [form.projectId]);
+  useEffect(() => { if (form.projectId) { fetch(`/api/test-cases?projectId=${form.projectId}`).then(r => r.json()).then(data => setTestCases(data.data || [])); fetch(`/api/test-cycles?projectId=${form.projectId}`).then(r => r.json()).then(setTestCycles); } }, [form.projectId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setError(null); setLoading(true);

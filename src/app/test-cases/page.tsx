@@ -10,7 +10,7 @@ export default function TestCasesPage() {
   const [cases, setCases] = useState<TestCase[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetch("/api/test-cases").then(r => r.json()).then(setCases).finally(() => setLoading(false)); }, []);
+  useEffect(() => { fetch("/api/test-cases").then(r => r.json()).then(data => setCases(data.data || [])).finally(() => setLoading(false)); }, []);
 
   if (loading) return <div className="container mx-auto px-4 py-8"><p>Cargando...</p></div>;
 
