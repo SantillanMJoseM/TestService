@@ -175,9 +175,26 @@ if [ $WAITED -ge $MAX_WAIT ]; then
 fi
 echo ""
 
-# 9. Ejecutar migraciones (se ejecutan automaticamente al iniciar el contenedor)
-echo "Las migraciones se ejecutaran automaticamente al iniciar la aplicacion."
-echo -e "${GREEN}Migraciones configuradas.${NC}"
+# 9. Ejecutar migraciones
+echo "Ejecutando migraciones de Prisma..."
+docker compose -f docker/compose.yml exec -T app node /app/node_modules/prisma/build/index.js migrate deploy
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}ERROR: Fallo al ejecutar migraciones.${NC}"
+    echo "Verificar logs: docker compose -f docker/compose.yml logs app"
+    exit 1
+fi
+echo -e "${GREEN}Migraciones aplicadas.${NC}"
+echo ""
+
+# 10. Ejecutar seed
+echo "Ejecutando seed (creacion de admin y roles)..."
+docker compose -f docker/compose.yml exec -T app node /app/prisma/seed.js
+if [ $? -ne 0 ]; then
+    echo -e "${RED}ERROR: Fallo al ejecutar seed.${NC}"
+    exit 1
+fi
+echo -e "${GREEN}Seed ejecutado.${NC}"
 echo ""
 
 # 10. Verificar funcionamiento
