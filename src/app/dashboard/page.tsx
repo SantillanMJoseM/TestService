@@ -20,11 +20,11 @@ export default function DashboardPage() {
     async function fetchStats() {
       try {
         const [projects, testCases, executions, defects, uatApprovals] = await Promise.all([
-          fetch("/api/projects").then(r => r.json()),
-          fetch("/api/test-cases").then(r => r.json()),
-          fetch("/api/executions").then(r => r.json()),
-          fetch("/api/defects").then(r => r.json()),
-          fetch("/api/uat-approvals").then(r => r.json()),
+          fetch("/api/projects").then(r => r.json()).then(d => d.data || []),
+          fetch("/api/test-cases").then(r => r.json()).then(d => d.data || []),
+          fetch("/api/executions").then(r => r.json()).then(d => Array.isArray(d) ? d : (d.data || [])),
+          fetch("/api/defects").then(r => r.json()).then(d => Array.isArray(d) ? d : (d.data || [])),
+          fetch("/api/uat-approvals").then(r => r.json()).then(d => Array.isArray(d) ? d : (d.data || [])),
         ]);
 
         const passed = executions.filter((e: { status: string }) => e.status === "Passed").length;

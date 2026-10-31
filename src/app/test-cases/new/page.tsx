@@ -12,7 +12,7 @@ export default function NewTestCasePage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/projects").then(r => r.json()).then(setProjects);
+    fetch("/api/projects").then(r => r.json()).then(data => setProjects(data.data || []));
   }, []);
 
   useEffect(() => {

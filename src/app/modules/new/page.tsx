@@ -12,7 +12,7 @@ export default function NewModulePage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/projects").then(r => r.json()).then(setProjects);
+    fetch("/api/projects").then(r => r.json()).then(data => setProjects(data.data || []));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

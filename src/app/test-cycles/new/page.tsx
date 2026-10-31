@@ -10,7 +10,7 @@ export default function NewTestCyclePage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { fetch("/api/projects").then(r => r.json()).then(setProjects); }, []);
+  useEffect(() => { fetch("/api/projects").then(r => r.json()).then(data => setProjects(data.data || [])); }, []);
   useEffect(() => { if (form.projectId) fetch(`/api/versions?projectId=${form.projectId}`).then(r => r.json()).then(setVersions); }, [form.projectId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
