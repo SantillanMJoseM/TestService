@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createTestCaseSchema } from "@/lib/validations/test-case";
+import { requirePermission, handleAuthError } from "@/lib/get-user";
+import { getUserProjects, canAccessProject } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export async function GET(request: NextRequest) {
   try {
+    const user = await requirePermission(request, "test-cases", "view");
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "10")));
@@ -14,8 +18,17 @@ export async function GET(request: NextRequest) {
     const moduleId = searchParams.get("moduleId") || "";
     const skip = (page - 1) * limit;
 
-    const where: Record<string, unknown> = {};
-    if (projectId) where.projectId = projectId;
+    const accessibleProjects = await getUserProjects(user.id);
+
+    const where: Record<string, unknown> = {
+      projectId: { in: accessibleProjects },
+    };
+    if (projectId) {
+      if (!accessibleProjects.includes(projectId)) {
+        return NextResponse.json({ error: "No tiene acceso a este proyecto" }, { status: 403 });
+      }
+      where.projectId = projectId;
+    }
     if (moduleId) where.moduleId = moduleId;
     if (priority) where.priority = priority;
     if (type) where.type = type;
@@ -42,15 +55,19 @@ export async function GET(request: NextRequest) {
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    console.error("Error al obtener casos de prueba:", error);
-    return NextResponse.json({ error: "Error al obtener los casos de prueba" }, { status: 500 });
+    return handleAuthError(error) as NextResponse;
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await requirePermission(request, "test-cases", "create");
     const body = await request.json();
     const validatedData = createTestCaseSchema.parse(body);
+
+    if (!(await canAccessProject(user.id, validatedData.projectId))) {
+      return NextResponse.json({ error: "No tiene acceso a este proyecto" }, { status: 403 });
+    }
 
     const testCase = await prisma.testCase.create({
       data: {
@@ -67,12 +84,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    await logAudit({ action: "CREATE", entity: "TestCase", entityId: testCase.id, userId: user.id, details: `Caso de prueba ${testCase.title} creado` });
+
     return NextResponse.json(testCase, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.name === "ZodError") {
       return NextResponse.json({ error: "Datos inválidos", details: error.message }, { status: 400 });
     }
-    console.error("Error al crear caso de prueba:", error);
-    return NextResponse.json({ error: "Error al crear el caso de prueba" }, { status: 500 });
+    return handleAuthError(error) as NextResponse;
   }
 }
