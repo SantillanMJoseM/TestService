@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import AuthNav from "@/components/AuthNav";
 
 export const metadata: Metadata = {
   title: "TestService",
@@ -21,14 +22,7 @@ export default function RootLayout({
               <Link href="/" className="text-xl font-bold text-blue-600">
                 TestService
               </Link>
-              <div className="flex gap-2 text-sm">
-                <Link href="/login" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
-                  Iniciar sesión
-                </Link>
-                <Link href="/register" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
-                  Registrarse
-                </Link>
-              </div>
+              <AuthNav />
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
               <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
@@ -60,6 +54,12 @@ export default function RootLayout({
               </Link>
               <Link href="/users" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
                 Usuarios
+              </Link>
+              <Link href="/registration-requests" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
+                Solicitudes
+              </Link>
+              <Link href="/roles" className="text-gray-600 hover:text-gray-900 font-medium px-2 py-1 rounded hover:bg-gray-100">
+                Roles y permisos
               </Link>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { logAudit } from "@/lib/audit";
 import { z } from "zod";
 
 const updateRoleSchema = z.object({
-  name: z.string().min(1).max(50).optional(),
+  name: z.string().min(1, "El nombre es obligatorio").max(50).optional(),
   description: z.string().max(200).optional().nullable(),
   isActive: z.boolean().optional(),
 });
@@ -16,6 +16,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     await requirePermission(request, "roles", "view");
     const { id } = await params;
+
     const role = await prisma.role.findUnique({
       where: { id },
       include: {
@@ -23,7 +24,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         _count: { select: { users: true } },
       },
     });
-    if (!role) return NextResponse.json({ error: "Rol no encontrado" }, { status: 404 });
+
+    if (!role) {
+      return NextResponse.json({ error: "Rol no encontrado" }, { status: 404 });
+    }
+
     return NextResponse.json(role);
   } catch (error) {
     return handleAuthError(error) as NextResponse;
@@ -38,11 +43,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const validatedData = updateRoleSchema.parse(body);
 
     const existing = await prisma.role.findUnique({ where: { id } });
-    if (!existing) return NextResponse.json({ error: "Rol no encontrado" }, { status: 404 });
-
-    // Protect admin role
-    if (existing.name === "Administrador" && validatedData.isActive === false) {
-      return NextResponse.json({ error: "No se puede desactivar el rol Administrador" }, { status: 403 });
+    if (!existing) {
+      return NextResponse.json({ error: "Rol no encontrado" }, { status: 404 });
     }
 
     const role = await prisma.role.update({
@@ -72,18 +74,20 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const admin = await requirePermission(request, "roles", "delete");
     const { id } = await params;
 
-    const role = await prisma.role.findUnique({ where: { id } });
-    if (!role) return NextResponse.json({ error: "Rol no encontrado" }, { status: 404 });
+    const existing = await prisma.role.findUnique({
+      where: { id },
+      include: { _count: { select: { users: true } } },
+    });
 
-    // Protect admin role
-    if (role.name === "Administrador") {
-      return NextResponse.json({ error: "No se puede eliminar el rol Administrador" }, { status: 403 });
+    if (!existing) {
+      return NextResponse.json({ error: "Rol no encontrado" }, { status: 404 });
     }
 
-    // Check if role has users
-    const userCount = await prisma.user.count({ where: { roleId: id } });
-    if (userCount > 0) {
-      return NextResponse.json({ error: "No se puede eliminar un rol con usuarios asignados" }, { status: 409 });
+    if (existing._count.users > 0) {
+      return NextResponse.json(
+        { error: "No se puede eliminar un rol asignado a usuarios" },
+        { status: 409 }
+      );
     }
 
     await prisma.role.delete({ where: { id } });
@@ -93,7 +97,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       entity: "Role",
       entityId: id,
       userId: admin.id,
-      details: `Rol ${role.name} eliminado`,
+      details: `Rol ${existing.name} eliminado`,
     });
 
     return NextResponse.json({ message: "Rol eliminado correctamente" });

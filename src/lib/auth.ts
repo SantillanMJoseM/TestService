@@ -65,13 +65,17 @@ export function getSessionTokenFromCookie(cookieHeader: string | null): string |
   return sessionCookie.split("=")[1] || null;
 }
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export function createSessionCookie(token: string): string {
   const maxAge = SESSION_DURATION_MS / 1000;
-  return `session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`;
+  const secureFlag = isProduction ? "; Secure" : "";
+  return `session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secureFlag}`;
 }
 
 export function createLogoutCookie(): string {
-  return "session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
+  const secureFlag = isProduction ? "; Secure" : "";
+  return `session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secureFlag}`;
 }
 
 export async function hasPermission(userId: string, section: string, action: string): Promise<boolean> {
@@ -81,7 +85,7 @@ export async function hasPermission(userId: string, section: string, action: str
   });
 
   if (!user) return false;
-  if (user.role === "Admin") return true; // Legacy admin
+  if (user.role === "Admin" || user.roleRef?.name === "Administrador") return true; // Legacy/admin role
 
   if (!user.roleRef) return false;
 
@@ -93,11 +97,11 @@ export async function hasPermission(userId: string, section: string, action: str
 export async function getUserProjects(userId: string): Promise<string[]> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { projectAssignments: true },
+    include: { projectAssignments: true, roleRef: true },
   });
 
   if (!user) return [];
-  if (user.role === "Admin") {
+  if (user.role === "Admin" || user.roleRef?.name === "Administrador") {
     // Admin can see all projects
     const allProjects = await prisma.project.findMany({ select: { id: true } });
     return allProjects.map((p) => p.id);
@@ -109,11 +113,11 @@ export async function getUserProjects(userId: string): Promise<string[]> {
 export async function canAccessProject(userId: string, projectId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { projectAssignments: true },
+    include: { projectAssignments: true, roleRef: true },
   });
 
   if (!user) return false;
-  if (user.role === "Admin") return true;
+  if (user.role === "Admin" || user.roleRef?.name === "Administrador") return true;
 
   return user.projectAssignments.some((pa) => pa.projectId === projectId);
 }

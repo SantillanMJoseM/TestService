@@ -1,32 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { updateTestCaseSchema } from "@/lib/validations/test-case";
+import { requirePermission, handleAuthError } from "@/lib/get-user";
+import { canAccessProject } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    const user = await requirePermission(request, "test-cases", "view");
     const { id } = await params;
     const testCase = await prisma.testCase.findUnique({
       where: { id },
       include: { project: true, module: true, version: true, executions: true },
     });
     if (!testCase) return NextResponse.json({ error: "Caso de prueba no encontrado" }, { status: 404 });
+    if (!(await canAccessProject(user.id, testCase.projectId))) {
+      return NextResponse.json({ error: "No tiene acceso a este proyecto" }, { status: 403 });
+    }
     return NextResponse.json(testCase);
   } catch (error) {
-    console.error("Error al obtener caso de prueba:", error);
-    return NextResponse.json({ error: "Error al obtener el caso de prueba" }, { status: 500 });
+    return handleAuthError(error) as NextResponse;
   }
 }
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    const user = await requirePermission(request, "test-cases", "edit");
     const { id } = await params;
     const body = await request.json();
     const validatedData = updateTestCaseSchema.parse(body);
 
     const existing = await prisma.testCase.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ error: "Caso de prueba no encontrado" }, { status: 404 });
+    if (!(await canAccessProject(user.id, existing.projectId))) {
+      return NextResponse.json({ error: "No tiene acceso a este proyecto" }, { status: 403 });
+    }
 
     const testCase = await prisma.testCase.update({
       where: { id },
@@ -42,25 +52,33 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         ...(validatedData.versionId !== undefined && { versionId: validatedData.versionId }),
       },
     });
+
+    await logAudit({ action: "UPDATE", entity: "TestCase", entityId: id, userId: user.id, details: `Caso de prueba ${testCase.title} actualizado` });
+
     return NextResponse.json(testCase);
   } catch (error) {
     if (error instanceof Error && error.name === "ZodError") {
       return NextResponse.json({ error: "Datos inválidos", details: error.message }, { status: 400 });
     }
-    console.error("Error al actualizar caso de prueba:", error);
-    return NextResponse.json({ error: "Error al actualizar el caso de prueba" }, { status: 500 });
+    return handleAuthError(error) as NextResponse;
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    const user = await requirePermission(request, "test-cases", "delete");
     const { id } = await params;
     const existing = await prisma.testCase.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ error: "Caso de prueba no encontrado" }, { status: 404 });
+    if (!(await canAccessProject(user.id, existing.projectId))) {
+      return NextResponse.json({ error: "No tiene acceso a este proyecto" }, { status: 403 });
+    }
     await prisma.testCase.delete({ where: { id } });
+
+    await logAudit({ action: "DELETE", entity: "TestCase", entityId: id, userId: user.id, details: "Caso de prueba eliminado" });
+
     return NextResponse.json({ message: "Caso de prueba eliminado correctamente" });
   } catch (error) {
-    console.error("Error al eliminar caso de prueba:", error);
-    return NextResponse.json({ error: "Error al eliminar el caso de prueba" }, { status: 500 });
+    return handleAuthError(error) as NextResponse;
   }
 }

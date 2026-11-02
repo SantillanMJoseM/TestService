@@ -30,6 +30,7 @@ export default function UsersPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -40,6 +41,7 @@ export default function UsersPage() {
                   <td className="px-6 py-4 text-sm text-gray-600">{u.email}</td>
                   <td className="px-6 py-4"><span className={`text-xs font-medium px-2.5 py-0.5 rounded ${roleColor[u.role]}`}>{u.role}</span></td>
                   <td className="px-6 py-4"><span className={`text-xs font-medium px-2.5 py-0.5 rounded ${u.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{u.isActive ? "Activo" : "Inactivo"}</span></td>
+                  <td className="px-6 py-4"><Link href={`/users/${u.id}/edit`} className="text-blue-600 hover:underline text-sm">Editar</Link></td>
                 </tr>
               ))}
             </tbody>

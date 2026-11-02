@@ -40,6 +40,7 @@ model Module {
 
   testCases   TestCase[]
 
+  @@index([projectId])
   @@map("modules")
 }
 
@@ -56,6 +57,7 @@ model Version {
   testCases   TestCase[]
   uatApprovals UatApproval[]
 
+  @@index([projectId])
   @@map("versions")
 }
 
@@ -79,6 +81,9 @@ model TestCase {
 
   executions  Execution[]
 
+  @@index([projectId])
+  @@index([moduleId])
+  @@index([versionId])
   @@map("test_cases")
 }
 
@@ -97,6 +102,8 @@ model TestCycle {
 
   executions  Execution[]
 
+  @@index([projectId])
+  @@index([versionId])
   @@map("test_cycles")
 }
 
@@ -118,6 +125,9 @@ model Execution {
 
   defects     Defect[]
 
+  @@index([projectId])
+  @@index([testCaseId])
+  @@index([testCycleId])
   @@map("executions")
 }
 
@@ -137,6 +147,8 @@ model Defect {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([projectId])
+  @@index([executionId])
   @@map("defects")
 }
 
@@ -159,6 +171,8 @@ model User {
   sessions          Session[]
   projectAssignments UserProject[]
 
+  @@index([roleId])
+  @@index([status])
   @@map("users")
 }
 
@@ -175,6 +189,8 @@ model UatApproval {
   user        User     @relation(fields: [approvedBy], references: [id])
   createdAt   DateTime @default(now())
 
+  @@index([projectId])
+  @@index([versionId])
   @@map("uat_approvals")
 }
 
@@ -185,6 +201,7 @@ model Session {
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("sessions")
 }
 
@@ -260,6 +277,7 @@ model UserProject {
   createdAt DateTime @default(now())
 
   @@unique([userId, projectId])
+  @@index([projectId])
   @@map("user_projects")
 }
 

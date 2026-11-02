@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requirePermission, handleAuthError } from "@/lib/get-user";
+import { getUserProjects } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const type = searchParams.get("type") || "executions";
-
   try {
+    const user = await requirePermission(request, "reports", "export");
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type") || "executions";
+    const accessibleProjects = await getUserProjects(user.id);
+
     if (type === "executions") {
       const executions = await prisma.execution.findMany({
+        where: { projectId: { in: accessibleProjects } },
         include: { testCase: true, project: true },
         orderBy: { createdAt: "desc" },
       });
@@ -29,6 +34,7 @@ export async function GET(request: NextRequest) {
 
     if (type === "defects") {
       const defects = await prisma.defect.findMany({
+        where: { projectId: { in: accessibleProjects } },
         include: { project: true },
         orderBy: { createdAt: "desc" },
       });
@@ -50,6 +56,7 @@ export async function GET(request: NextRequest) {
 
     if (type === "test-cases") {
       const testCases = await prisma.testCase.findMany({
+        where: { projectId: { in: accessibleProjects } },
         include: { project: true, module: true },
         orderBy: { createdAt: "desc" },
       });
@@ -71,7 +78,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ error: "Tipo de exportación no válido" }, { status: 400 });
   } catch (error) {
-    console.error("Error al exportar:", error);
-    return NextResponse.json({ error: "Error al exportar datos" }, { status: 500 });
+    return handleAuthError(error) as NextResponse;
   }
 }

@@ -42,7 +42,8 @@ export async function requireAuth(request: Request): Promise<AuthUser> {
 
 export async function requirePermission(request: Request, section: string, action: string): Promise<AuthUser> {
   const user = await requireAuth(request);
-  if (user.role !== "Admin") {
+  const isAdmin = user.role === "Admin"; // roleRef-based admin is handled in hasPermission
+  if (!isAdmin) {
     const allowed = await hasPermission(user.id, section, action);
     if (!allowed) {
       throw new Error("FORBIDDEN");
@@ -53,6 +54,7 @@ export async function requirePermission(request: Request, section: string, actio
 
 export async function requireAdmin(request: Request): Promise<AuthUser> {
   const user = await requireAuth(request);
+  // roleRef is not included in AuthUser; allow legacy admin string here.
   if (user.role !== "Admin") {
     throw new Error("FORBIDDEN");
   }

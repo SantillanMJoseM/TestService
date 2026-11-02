@@ -138,6 +138,7 @@ Copiar .env.example a .env y completar los valores:
     │   └── compose.yml
     ├── docs/
     │   ├── architecture.md
+    │   ├── workflow.md
     │   ├── data-model.md
 
 ## Estado actual del proyecto
@@ -156,8 +157,11 @@ El proyecto se encuentra en fase release candidate. Se han implementado todos lo
 - Ejecuciones — Registro de resultados con estado y evidencia
 - Incidencias (Defectos) — Reporte de defectos vinculados a ejecuciones
 - Aprobaciones UAT — Aprobaciones por usuarios de negocio
-- Usuarios — Gestion de usuarios con roles
+- Usuarios — Gestion de usuarios con roles, asignacion de proyectos y edicion de permisos
+- Roles y permisos — Administracion de roles y permisos por seccion/accion
+- Solicitudes de registro — Aprobacion/rechazo de registros con asignacion de rol y proyectos
 - Autenticacion — Registro, login, logout con sesiones en base de datos
+- Multi-proyecto — Aislamiento de datos por proyectos asignados al usuario
 - Dashboard — Metricas y resumen del estado de testing
 - Exportacion — Exportacion de datos a CSV, Excel y PDF
 - Auditoria — Log de cambios y acciones (tabla audit_logs)
@@ -177,8 +181,8 @@ El proyecto se encuentra en fase release candidate. Se han implementado todos lo
 
 ### Funcionalidades pendientes para futuras versiones
 
-- Pruebas de integracion completas (tests para todos los API routes)
-- Edicion y eliminacion en UI para modulos restantes
+- Pruebas de integracion para todos los API routes (ampliar cobertura)
+- Edicion y eliminacion en UI para modulos restantes (defectos, ejecuciones, UAT, versiones)
 - Notificaciones en tiempo real (WebSockets)
 - Exportacion avanzada (PDF con graficos, Excel con formato)
 - Internacionalizacion completa (integrar next-intl)

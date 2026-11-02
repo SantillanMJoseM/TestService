@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requirePermission, handleAuthError } from "@/lib/get-user";
 
 export async function GET(request: NextRequest) {
   try {
+    await requirePermission(request, "audit", "view");
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "20")));
@@ -29,7 +31,6 @@ export async function GET(request: NextRequest) {
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    console.error("Error al obtener logs de auditoría:", error);
-    return NextResponse.json({ error: "Error al obtener los logs de auditoría" }, { status: 500 });
+    return handleAuthError(error) as NextResponse;
   }
 }
